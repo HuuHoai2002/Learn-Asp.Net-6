@@ -6,7 +6,6 @@ using Learn_Asp.Net_6.Models;
 
 namespace Learn_Asp.Net_6.Controllers
 {
-
   [Route("api/[controller]")]
   [ApiController]
   public class SuperHeroController : ControllerBase
@@ -20,6 +19,7 @@ namespace Learn_Asp.Net_6.Controllers
     [HttpGet]
     public async Task<ActionResult<List<SuperHero>>> Get()
     {
+
       var superHeroes = await _context.SuperHeroes.ToListAsync();
 
       return Ok(superHeroes);
@@ -47,13 +47,25 @@ namespace Learn_Asp.Net_6.Controllers
       return CreatedAtAction(nameof(Get), new { id = hero.Id }, hero);
     }
 
-    [HttpPut("update/{id}")]
+    [HttpPut("update")]
     public async Task<ActionResult<SuperHero>> Put([FromBody] SuperHero hero)
     {
-      _context.SuperHeroes.Update(hero);
+      var superHero = await _context.SuperHeroes.FindAsync(hero.Id);
+
+      if (superHero == null)
+      {
+        return NotFound();
+      }
+      superHero.Id = hero.Id;
+      superHero.Name = hero.Name;
+      superHero.FirstName = hero.FirstName;
+      superHero.LastName = hero.LastName;
+      superHero.Place = hero.Place;
+      superHero.UpdatedAt = DateTime.Now;
+
       await _context.SaveChangesAsync();
 
-      return CreatedAtAction(nameof(Get), new { id = hero.Id }, hero);
+      return Ok(new { message = "Super Hero Updated" });
     }
 
     [HttpDelete("delete/{id}")]
